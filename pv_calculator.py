@@ -58,7 +58,9 @@ with st.sidebar:
 def calculate_theta(opposing_h, building_h, street_w):
     height_diff = opposing_h - building_h
     theta_rad = np.arctan(height_diff / street_w)
-    theta_deg = np.degrees(theta_rad) 
+    theta_deg = np.degrees(theta_rad)
+    if theta_deg < 0:
+        return 0
     return theta_deg
 
 # Real-time Calculations (No button needed for better UX)
@@ -145,4 +147,5 @@ with tab2:
         "Obstruction East (°)": f"{theta_east:.2f}",
         "Obstruction West (°)": f"{theta_west:.2f}",
     }
+
     st.json(details)
