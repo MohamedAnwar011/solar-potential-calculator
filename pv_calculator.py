@@ -141,6 +141,58 @@ def make_cube_trace(x_center, y_center, z_base, dx, dy, dz, color, name):
 st.title("☀️ Solar Potential Analysis")
 st.markdown("Real-time assessment of PV suitability based on urban context.")
 
+
+
+
+# ... previous code in tab1 ...
+    
+st.subheader("3D Building Model")
+
+# --- 3D PLOTTING LOGIC ---
+# 1. Main Building (Blue)
+# Centered at 0,0
+main_bldg = make_cube_trace(0, 0, 0, width, length, building_height, '#3366CC', 'My Building')
+
+# Define arbitrary depth/width for obstruction blocks just for visualization (e.g., 10m)
+obs_depth = 10.0  
+
+# 2. South Obstruction (Gray)
+# Position: Shifted -Y by (Half Main Length + Street Width + Half Obs Depth)
+y_south_pos = -(length/2 + w_south + obs_depth/2)
+south_bldg = make_cube_trace(0, y_south_pos, 0, width, obs_depth, h_south, '#A9A9A9', 'South Obstruction')
+
+# 3. East Obstruction (Gray)
+# Position: Shifted +X by (Half Main Width + Street Width + Half Obs Depth)
+x_east_pos = (width/2 + w_east + obs_depth/2)
+east_bldg = make_cube_trace(x_east_pos, 0, 0, obs_depth, length, h_east, '#A9A9A9', 'East Obstruction')
+
+# 4. West Obstruction (Gray)
+# Position: Shifted -X by (Half Main Width + Street Width + Half Obs Depth)
+x_west_pos = -(width/2 + w_west + obs_depth/2)
+west_bldg = make_cube_trace(x_west_pos, 0, 0, obs_depth, length, h_west, '#A9A9A9', 'West Obstruction')
+
+# Combine into figure
+fig_3d = go.Figure(data=[main_bldg, south_bldg, east_bldg, west_bldg])
+
+# Layout settings to ensure the building looks like a building (aspect ratio)
+fig_3d.update_layout(
+    scene=dict(
+        aspectmode='data', # Keeps the scale real (1m = 1m on all axes)
+        xaxis_title='East-West (m)',
+        yaxis_title='North-South (m)',
+        zaxis_title='Height (m)'
+    ),
+    margin=dict(l=0, r=0, b=0, t=0),
+    height=500
+)
+
+st.plotly_chart(fig_3d, use_container_width=True)
+
+
+
+
+
+
 # Create Tabs for better organization
 tab1, tab2 = st.tabs(["📊 Dashboard Results", "📝 Detailed Data"])
 
@@ -189,53 +241,7 @@ with tab1:
     
     
     
-    # ... previous code in tab1 ...
     
-    st.subheader("3D Building Model")
-    
-    # --- 3D PLOTTING LOGIC ---
-    # 1. Main Building (Blue)
-    # Centered at 0,0
-    main_bldg = make_cube_trace(0, 0, 0, width, length, building_height, '#3366CC', 'My Building')
-
-    # Define arbitrary depth/width for obstruction blocks just for visualization (e.g., 10m)
-    obs_depth = 10.0  
-
-    # 2. South Obstruction (Gray)
-    # Position: Shifted -Y by (Half Main Length + Street Width + Half Obs Depth)
-    y_south_pos = -(length/2 + w_south + obs_depth/2)
-    south_bldg = make_cube_trace(0, y_south_pos, 0, width, obs_depth, h_south, '#A9A9A9', 'South Obstruction')
-
-    # 3. East Obstruction (Gray)
-    # Position: Shifted +X by (Half Main Width + Street Width + Half Obs Depth)
-    x_east_pos = (width/2 + w_east + obs_depth/2)
-    east_bldg = make_cube_trace(x_east_pos, 0, 0, obs_depth, length, h_east, '#A9A9A9', 'East Obstruction')
-
-    # 4. West Obstruction (Gray)
-    # Position: Shifted -X by (Half Main Width + Street Width + Half Obs Depth)
-    x_west_pos = -(width/2 + w_west + obs_depth/2)
-    west_bldg = make_cube_trace(x_west_pos, 0, 0, obs_depth, length, h_west, '#A9A9A9', 'West Obstruction')
-
-    # Combine into figure
-    fig_3d = go.Figure(data=[main_bldg, south_bldg, east_bldg, west_bldg])
-
-    # Layout settings to ensure the building looks like a building (aspect ratio)
-    fig_3d.update_layout(
-        scene=dict(
-            aspectmode='data', # Keeps the scale real (1m = 1m on all axes)
-            xaxis_title='East-West (m)',
-            yaxis_title='North-South (m)',
-            zaxis_title='Height (m)'
-        ),
-        margin=dict(l=0, r=0, b=0, t=0),
-        height=500
-    )
-
-    st.plotly_chart(fig_3d, use_container_width=True)
-
-
-
-
 
 
 with tab2:
@@ -253,5 +259,6 @@ with tab2:
     }
 
     st.json(details)
+
 
 
