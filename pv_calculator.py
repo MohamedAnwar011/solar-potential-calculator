@@ -104,8 +104,8 @@ with tab1:
         st.metric(
             label="PV Utilization",
             value=f"{pv_utilization:.2f}%",
-            delta="Efficiency",
-            delta_color="normal",
+            # delta="Efficiency",
+            # delta_color="normal",
             help="Based on Sunhours and Roof-to-Floor Area ratio"
         )
     with col2:
@@ -149,3 +149,4 @@ with tab2:
     }
 
     st.json(details)
+
