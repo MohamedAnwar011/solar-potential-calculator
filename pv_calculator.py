@@ -1,6 +1,7 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
+import plotly.graph_objects as go
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(
@@ -88,6 +89,54 @@ pv_utilization = -37.51 + (0.5075 * sunhours_percent) + (1.6110 * rtfa_percent)
 # 5. PV Yield Density 
 pv_yield_density = 120.07 - (0.2910 * theta_south) + (1.6800 * sunhours_percent)
 
+
+
+
+
+
+
+
+
+def make_cube_trace(x_center, y_center, z_base, dx, dy, dz, color, name):
+    """
+    Creates a 3D mesh cube for Plotly.
+    x_center, y_center: Coordinates of the block's center on the ground.
+    z_base: Elevation of the base (usually 0).
+    dx, dy, dz: Dimensions (Width, Length, Height).
+    """
+    # Define the 8 vertices of the cube
+    x = [x_center - dx/2, x_center + dx/2, x_center + dx/2, x_center - dx/2,
+         x_center - dx/2, x_center + dx/2, x_center + dx/2, x_center - dx/2]
+    y = [y_center - dy/2, y_center - dy/2, y_center + dy/2, y_center + dy/2,
+         y_center - dy/2, y_center - dy/2, y_center + dy/2, y_center + dy/2]
+    z = [z_base, z_base, z_base, z_base,
+         z_base + dz, z_base + dz, z_base + dz, z_base + dz]
+
+    # Define the 12 triangles (faces) that make up the cube
+    i = [7, 0, 0, 0, 4, 4, 6, 6, 4, 0, 3, 2]
+    j = [3, 4, 1, 2, 5, 6, 5, 2, 0, 1, 6, 3]
+    k = [0, 7, 2, 3, 6, 7, 1, 1, 5, 5, 7, 6]
+
+    return go.Mesh3d(
+        x=x, y=y, z=z,
+        i=i, j=j, k=k,
+        opacity=0.8,
+        color=color,
+        name=name,
+        flatshading=True,
+        hoverinfo='name+text',
+        text=f"Height: {dz}m<br>Width: {dx}m<br>Length: {dy}m"
+    )
+
+
+
+
+
+
+
+
+
+
 # --- MAIN DASHBOARD ---
 st.title("☀️ Solar Potential Analysis")
 st.markdown("Real-time assessment of PV suitability based on urban context.")
@@ -133,6 +182,61 @@ with tab1:
     with col_sun:
         st.metric(label="Calculated Sunhours", value=f"{sunhours_percent:.2f}%")
         st.info("Sunhours are derived from the obstruction angles of all three sides.", icon="ℹ️")
+    
+    
+    
+    
+    
+    
+    
+    # ... previous code in tab1 ...
+    
+    st.subheader("3D Building Model")
+    
+    # --- 3D PLOTTING LOGIC ---
+    # 1. Main Building (Blue)
+    # Centered at 0,0
+    main_bldg = make_cube_trace(0, 0, 0, width, length, building_height, '#3366CC', 'My Building')
+
+    # Define arbitrary depth/width for obstruction blocks just for visualization (e.g., 10m)
+    obs_depth = 10.0  
+
+    # 2. South Obstruction (Gray)
+    # Position: Shifted -Y by (Half Main Length + Street Width + Half Obs Depth)
+    y_south_pos = -(length/2 + w_south + obs_depth/2)
+    south_bldg = make_cube_trace(0, y_south_pos, 0, width, obs_depth, h_south, '#A9A9A9', 'South Obstruction')
+
+    # 3. East Obstruction (Gray)
+    # Position: Shifted +X by (Half Main Width + Street Width + Half Obs Depth)
+    x_east_pos = (width/2 + w_east + obs_depth/2)
+    east_bldg = make_cube_trace(x_east_pos, 0, 0, obs_depth, length, h_east, '#A9A9A9', 'East Obstruction')
+
+    # 4. West Obstruction (Gray)
+    # Position: Shifted -X by (Half Main Width + Street Width + Half Obs Depth)
+    x_west_pos = -(width/2 + w_west + obs_depth/2)
+    west_bldg = make_cube_trace(x_west_pos, 0, 0, obs_depth, length, h_west, '#A9A9A9', 'West Obstruction')
+
+    # Combine into figure
+    fig_3d = go.Figure(data=[main_bldg, south_bldg, east_bldg, west_bldg])
+
+    # Layout settings to ensure the building looks like a building (aspect ratio)
+    fig_3d.update_layout(
+        scene=dict(
+            aspectmode='data', # Keeps the scale real (1m = 1m on all axes)
+            xaxis_title='East-West (m)',
+            yaxis_title='North-South (m)',
+            zaxis_title='Height (m)'
+        ),
+        margin=dict(l=0, r=0, b=0, t=0),
+        height=500
+    )
+
+    st.plotly_chart(fig_3d, use_container_width=True)
+
+
+
+
+
 
 with tab2:
     st.subheader("Input & Calculation Summary")
@@ -149,4 +253,5 @@ with tab2:
     }
 
     st.json(details)
+
 
