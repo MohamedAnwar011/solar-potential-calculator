@@ -121,6 +121,9 @@ pv_utilization = -37.51 + (0.5075 * sunhours_percent) + (1.6110 * rtfa_percent)
 # 5. PV Yield Density 
 pv_yield_density = 120.07 - (0.2910 * theta_south) + (1.6800 * sunhours_percent)
 
+# 6. PV roof area
+pv_roof_area= (roof_area - 32)×0.8
+
 
 # --- MAIN DASHBOARD ---
 st.title("☀️ Solar Potential Analysis")
@@ -228,6 +231,7 @@ with tab2:
     details = {
         "Roof Area (m²)": f"{roof_area:.2f}",
         "Total Floor Area (m²)": f"{total_floor_area:.2f}",
+        "Available roof area for PV=" :f"{pv_roof_area:.2f}
         "RTFA %": f"{rtfa_percent:.2f}",
         "Obstruction South (°)": f"{theta_south:.2f}",
         "Obstruction East (°)": f"{theta_east:.2f}",
@@ -235,4 +239,5 @@ with tab2:
     }
 
     st.json(details)
+
 
