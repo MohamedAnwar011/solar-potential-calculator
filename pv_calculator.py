@@ -122,7 +122,7 @@ pv_utilization = -37.51 + (0.5075 * sunhours_percent) + (1.6110 * rtfa_percent)
 pv_yield_density = 120.07 - (0.2910 * theta_south) + (1.6800 * sunhours_percent)
 
 # 6. PV roof area
-pv_roof_area= (roof_area - 32)×0.8
+pv_roof_area= (roof_area - 32) * 0.8
 
 
 # --- MAIN DASHBOARD ---
@@ -239,5 +239,6 @@ with tab2:
     }
 
     st.json(details)
+
 
 
