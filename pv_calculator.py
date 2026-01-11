@@ -131,12 +131,9 @@ st.title("☀️ Solar Potential Analysis")
 # --- INSERTED DISCLAIMER ---
 with st.expander("ℹ️ About this Tool & Methodology", expanded=False):
     st.markdown("""
-    This tool was developed to estimate rooftop PV performance in terms of PV utilization % and PV yield density, linking building and context parameters to rooftop PV performance in the context of **Cairo, Egypt**.
-    
-    * **PV utilization %** is the percentage of a building’s energy use that can be met by rooftop PV system, where energy use ranged from 51.3-84.77 kWh/m². This range was based on energy simulation results which is affected by building geometric proportions and external obstructions that shape shading patterns, thereby affecting lighting, cooling and heating loads.
-    * **PV yield density** is the annual energy generated per one meter square of PV panel. It supports the decision making by providing the required PV area to be installed to achieve a target energy output. 
-    
-    Beyond building energy use, this model provides an overview of roof potential under varying shading patterns.
+    This tool was developed to estimate rooftop PV performance in terms of PV Utilization % and PV Yield Density, linking building and context parameters to rooftop PV performance in the context of **Cairo, Egypt**.
+PV Utilization (%) is the percentage of a building’s energy use that can be met by rooftop PV system, where energy use ranged from 51.3-84.77 kWh/m2. This range was based on energy simulation results which is affected by building geometric proportions and external obstructions that shape shading patterns, thereby affecting lighting, cooling and heating loads.
+PV Yield Density (kWh/m2) is the annual energy generated per one meter square of PV panel. It supports the decision making by indicating the required PV area to be installed to achieve a target energy output. Beyond building energy use, this metric provides an overview of roof potential under varying shading patterns
     """)
 # ---------------------------
 
@@ -239,6 +236,7 @@ with tab2:
     }
 
     st.json(details)
+
 
 
 
