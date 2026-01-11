@@ -12,7 +12,6 @@ st.set_page_config(
 )
 
 # --- CUSTOM CSS FOR STYLING ---
-# This adds a subtle background and cards for metrics to make them pop
 st.markdown("""
 <style>
     .stMetric {
@@ -22,11 +21,54 @@ st.markdown("""
         border: 1px solid #e6e6e6;
         box-shadow: 0 4px 6px rgba(0,0,0,0.05);
     }
-    .st-emotion-cache-16idsys p {
-        font-size: 1.1em;
+    .disclaimer-box {
+        background-color: #f0f2f6;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        border-left: 5px solid #ff4b4b;
     }
 </style>
 """, unsafe_allow_html=True)
+
+# --- HELPER FUNCTIONS ---
+
+def calculate_theta(opposing_h, building_h, street_w):
+    """Calculates Obstruction Angle theta"""
+    height_diff = opposing_h - building_h
+    theta_rad = np.arctan(height_diff / street_w)
+    theta_deg = np.degrees(theta_rad)
+    if theta_deg < 0:
+        return 0
+    return theta_deg
+
+def make_cube_trace(x_center, y_center, z_base, dx, dy, dz, color, name):
+    """
+    Creates a 3D mesh cube for Plotly.
+    """
+    # Define the 8 vertices of the cube
+    x = [x_center - dx/2, x_center + dx/2, x_center + dx/2, x_center - dx/2,
+         x_center - dx/2, x_center + dx/2, x_center + dx/2, x_center - dx/2]
+    y = [y_center - dy/2, y_center - dy/2, y_center + dy/2, y_center + dy/2,
+         y_center - dy/2, y_center - dy/2, y_center + dy/2, y_center + dy/2]
+    z = [z_base, z_base, z_base, z_base,
+         z_base + dz, z_base + dz, z_base + dz, z_base + dz]
+
+    # Define the 12 triangles (faces) that make up the cube
+    i = [7, 0, 0, 0, 4, 4, 6, 6, 4, 0, 3, 2]
+    j = [3, 4, 1, 2, 5, 6, 5, 2, 0, 1, 6, 3]
+    k = [0, 7, 2, 3, 6, 7, 1, 1, 5, 5, 7, 6]
+
+    return go.Mesh3d(
+        x=x, y=y, z=z,
+        i=i, j=j, k=k,
+        opacity=0.8,
+        color=color,
+        name=name,
+        flatshading=True,
+        hoverinfo='name+text',
+        text=f"Height: {dz}m<br>Width: {dx}m<br>Length: {dy}m"
+    )
 
 # --- SIDEBAR: USER INPUTS ---
 with st.sidebar:
@@ -55,16 +97,6 @@ with st.sidebar:
         w_west = st.number_input("Street Width (West)", value=12.0)
 
 # --- CALCULATION LOGIC ---
-# Helper function for Obstruction Angle theta 
-def calculate_theta(opposing_h, building_h, street_w):
-    height_diff = opposing_h - building_h
-    theta_rad = np.arctan(height_diff / street_w)
-    theta_deg = np.degrees(theta_rad)
-    if theta_deg < 0:
-        return 0
-    return theta_deg
-
-# Real-time Calculations (No button needed for better UX)
 # 1. Geometry 
 roof_area = length * width
 total_floor_area = length * width * num_floors
@@ -90,62 +122,21 @@ pv_utilization = -37.51 + (0.5075 * sunhours_percent) + (1.6110 * rtfa_percent)
 pv_yield_density = 120.07 - (0.2910 * theta_south) + (1.6800 * sunhours_percent)
 
 
-
-
-
-
-
-
-
-def make_cube_trace(x_center, y_center, z_base, dx, dy, dz, color, name):
-    """
-    Creates a 3D mesh cube for Plotly.
-    x_center, y_center: Coordinates of the block's center on the ground.
-    z_base: Elevation of the base (usually 0).
-    dx, dy, dz: Dimensions (Width, Length, Height).
-    """
-    # Define the 8 vertices of the cube
-    x = [x_center - dx/2, x_center + dx/2, x_center + dx/2, x_center - dx/2,
-         x_center - dx/2, x_center + dx/2, x_center + dx/2, x_center - dx/2]
-    y = [y_center - dy/2, y_center - dy/2, y_center + dy/2, y_center + dy/2,
-         y_center - dy/2, y_center - dy/2, y_center + dy/2, y_center + dy/2]
-    z = [z_base, z_base, z_base, z_base,
-         z_base + dz, z_base + dz, z_base + dz, z_base + dz]
-
-    # Define the 12 triangles (faces) that make up the cube
-    i = [7, 0, 0, 0, 4, 4, 6, 6, 4, 0, 3, 2]
-    j = [3, 4, 1, 2, 5, 6, 5, 2, 0, 1, 6, 3]
-    k = [0, 7, 2, 3, 6, 7, 1, 1, 5, 5, 7, 6]
-
-    return go.Mesh3d(
-        x=x, y=y, z=z,
-        i=i, j=j, k=k,
-        opacity=0.8,
-        color=color,
-        name=name,
-        flatshading=True,
-        hoverinfo='name+text',
-        text=f"Height: {dz}m<br>Width: {dx}m<br>Length: {dy}m"
-    )
-
-
-
-
-
-
-
-
-
-
 # --- MAIN DASHBOARD ---
 st.title("☀️ Solar Potential Analysis")
-st.markdown("Real-time assessment of PV suitability based on urban context.")
 
-
-
-
-# ... previous code in tab1 ...
+# --- INSERTED DISCLAIMER ---
+with st.expander("ℹ️ About this Tool & Methodology", expanded=True):
+    st.markdown("""
+    This tool was developed to estimate rooftop PV performance in terms of PV utilization % and PV yield density, linking building and context parameters to rooftop PV performance in the context of **Cairo, Egypt**.
     
+    * **PV utilization %** is the percentage of a building’s energy use that can be met by rooftop PV system, where energy use ranged from 51.3-84.77 kWh/m². This range was based on energy simulation results which is affected by building geometric proportions and external obstructions that shape shading patterns, thereby affecting lighting, cooling and heating loads.
+    * **PV yield density** is the annual energy generated per one meter square of PV panel. It supports the decision making by providing the required PV area to be installed to achieve a target energy output. 
+    
+    Beyond building energy use, this model provides an overview of roof potential under varying shading patterns.
+    """)
+# ---------------------------
+
 st.subheader("3D Building Model")
 
 # --- 3D PLOTTING LOGIC ---
@@ -174,7 +165,7 @@ west_bldg = make_cube_trace(x_west_pos, 0, 0, obs_depth, length, h_west, '#A9A9A
 # Combine into figure
 fig_3d = go.Figure(data=[main_bldg, south_bldg, east_bldg, west_bldg])
 
-# Layout settings to ensure the building looks like a building (aspect ratio)
+# Layout settings
 fig_3d.update_layout(
     scene=dict(
         aspectmode='data', # Keeps the scale real (1m = 1m on all axes)
@@ -189,11 +180,7 @@ fig_3d.update_layout(
 st.plotly_chart(fig_3d, use_container_width=True)
 
 
-
-
-
-
-# Create Tabs for better organization
+# --- RESULTS TABS ---
 tab1, tab2 = st.tabs(["📊 Dashboard Results", "📝 Detailed Data"])
 
 with tab1:
@@ -205,8 +192,6 @@ with tab1:
         st.metric(
             label="PV Utilization",
             value=f"{pv_utilization:.2f}%",
-            # delta="Efficiency",
-            # delta_color="normal",
             help="Based on Sunhours and Roof-to-Floor Area ratio"
         )
     with col2:
@@ -234,19 +219,10 @@ with tab1:
     with col_sun:
         st.metric(label="Calculated Sunhours", value=f"{sunhours_percent:.2f}%")
         st.info("Sunhours are derived from the obstruction angles of all three sides.", icon="ℹ️")
-    
-    
-    
-    
-    
-    
-    
-    
-
 
 with tab2:
     st.subheader("Input & Calculation Summary")
-    st.markdown("Derived parameters based on user inputs .")
+    st.markdown("Derived parameters based on user inputs.")
     
     # Using a clean JSON-like display for details
     details = {
@@ -259,6 +235,3 @@ with tab2:
     }
 
     st.json(details)
-
-
-
