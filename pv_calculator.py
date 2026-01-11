@@ -126,7 +126,7 @@ pv_yield_density = 120.07 - (0.2910 * theta_south) + (1.6800 * sunhours_percent)
 st.title("☀️ Solar Potential Analysis")
 
 # --- INSERTED DISCLAIMER ---
-with st.expander("ℹ️ About this Tool & Methodology", expanded=True):
+with st.expander("ℹ️ About this Tool & Methodology", expanded=False):
     st.markdown("""
     This tool was developed to estimate rooftop PV performance in terms of PV utilization % and PV yield density, linking building and context parameters to rooftop PV performance in the context of **Cairo, Egypt**.
     
@@ -235,3 +235,4 @@ with tab2:
     }
 
     st.json(details)
+
